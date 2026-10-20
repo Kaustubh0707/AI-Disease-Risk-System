@@ -1,0 +1,4 @@
+Disease,Model,Accuracy,Precision,Recall,F1_Score,ROC_AUC
+Heart_Disease,Bayesian_Network,0.95,1.0,0.375,0.5454545454545454,0.9321076766304348
+Diabetes,Bayesian_Network,1.0,1.0,1.0,1.0,1.0
+Stroke,Bayesian_Network,1.0,1.0,1.0,1.0,1.0

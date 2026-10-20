@@ -1,0 +1,22 @@
+
+(
+echo # Python cache files
+echo __pycache__/
+echo *.py[cod]
+echo.
+echo # Virtual environment
+echo .venv/
+echo.
+echo # Environment variables and secrets
+echo .env
+echo .env.*
+echo.
+echo # Logs
+echo *.log
+echo.
+echo # VS Code settings
+echo .vscode/
+echo.
+echo # Jupyter Notebook temporary files
+echo .ipynb_checkpoints/
+) > .gitignore

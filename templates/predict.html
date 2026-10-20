@@ -1,0 +1,499 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b2347">
+    <title>Predict Disease Risk | HealthAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .prediction-intro {
+            position: relative;
+            overflow: hidden;
+            padding: 30px 34px;
+            margin-bottom: 26px;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at 90% 10%, rgba(66,213,245,.2), transparent 28%),
+                linear-gradient(120deg, #0b2347, #15558b);
+            color: white;
+        }
+
+        .prediction-intro .eyebrow { color: #67e1fa; }
+
+        .prediction-intro h1 {
+            margin: 0;
+            font-size: clamp(28px, 4vw, 38px);
+            letter-spacing: -1px;
+        }
+
+        .prediction-intro p:last-child {
+            max-width: 650px;
+            margin-bottom: 0;
+            color: #d7e8fa;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .prediction-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 290px;
+            align-items: start;
+            gap: 24px;
+        }
+
+        .form-card { padding: 28px; }
+
+        .form-section-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-section-heading .card-icon {
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .form-section-heading h2 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .form-section-heading p {
+            margin: 4px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .field-icon {
+            display: inline-block;
+            margin-right: 5px;
+            color: var(--blue-600);
+        }
+
+        .form-sidebar {
+            display: grid;
+            gap: 18px;
+        }
+
+        .tips-card {
+            padding: 23px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: linear-gradient(150deg, #ffffff, #f0f7ff);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tips-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .tips-heading span { font-size: 21px; }
+
+        .tips-heading h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .tips-list {
+            display: grid;
+            gap: 13px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tips-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .tip-check {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .model-info {
+            padding: 22px;
+            border-radius: 16px;
+            background: #eaf5ff;
+        }
+
+        .model-info h3 {
+            margin: 0 0 9px;
+            font-size: 15px;
+        }
+
+        .model-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .model-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 14px;
+        }
+
+        .model-pill {
+            padding: 5px 9px;
+            border: 1px solid #d4e8fb;
+            border-radius: 7px;
+            background: white;
+            color: #28547e;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .submit-button {
+            width: 100%;
+            min-height: 50px;
+            margin-top: 28px;
+            font-size: 15px;
+        }
+
+        .submit-button:disabled {
+            cursor: wait;
+            opacity: .75;
+            transform: none;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 17px;
+            height: 17px;
+            border: 2px solid rgba(255,255,255,.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+
+        .submit-button.is-loading .loading-spinner {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .form-disclaimer {
+            margin-top: 18px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .prediction-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .form-sidebar {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 600px) {
+            .prediction-intro { padding: 25px 22px; }
+            .form-card { padding: 20px; }
+
+            .form-sidebar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <nav class="navbar" aria-label="Main navigation">
+            <a class="brand" href="/">
+                <span class="brand-mark" aria-hidden="true">✚</span>
+                <span>HealthAI</span>
+            </a>
+
+            <div class="nav-links">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link active" href="/predict" aria-current="page">Predict Risk</a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="prediction-intro animate-in">
+            <p class="eyebrow">Your Health, Your Insights</p>
+            <h1>Disease Risk Prediction</h1>
+            <p>
+                Enter the requested health and lifestyle information to compare
+                experimental predictions from our machine learning and
+                Bayesian Network models.
+            </p>
+        </section>
+
+        <div class="prediction-layout">
+            <section class="card form-card animate-in animate-delay-1">
+                <div class="form-section-heading">
+                    <div class="card-icon" aria-hidden="true">♙</div>
+                    <div>
+                        <h2>Patient Information</h2>
+                        <p>Complete all fields to run the prediction.</p>
+                    </div>
+                </div>
+
+                <form id="prediction-form" action="/predict" method="POST">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="age">
+                                <span class="field-icon">◷</span>Age (years)
+                            </label>
+                            <input
+                                class="form-control"
+                                type="number"
+                                id="age"
+                                name="age"
+                                min="0"
+                                max="120"
+                                value="45"
+                                required
+                            >
+                            <span class="form-hint">Range: 0–120 years</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">
+                                <span class="field-icon">♙</span>Gender
+                            </label>
+                            <select class="form-control" id="gender" name="gender" required>
+                                <option value="Male" selected>Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bmi">
+                                <span class="field-icon">⌁</span>BMI
+                            </label>
+                            <input
+                                class="form-control"
+                                type="number"
+                                id="bmi"
+                                name="bmi"
+                                min="10"
+                                max="100"
+                                step="0.1"
+                                value="26"
+                                required
+                            >
+                            <span class="form-hint">Range: 10–100</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="systolic_bp">
+                                <span class="field-icon">♥</span>Systolic BP (mmHg)
+                            </label>
+                            <input
+                                class="form-control"
+                                type="number"
+                                id="systolic_bp"
+                                name="systolic_bp"
+                                min="40"
+                                max="300"
+                                value="125"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="diastolic_bp">
+                                <span class="field-icon">♥</span>Diastolic BP (mmHg)
+                            </label>
+                            <input
+                                class="form-control"
+                                type="number"
+                                id="diastolic_bp"
+                                name="diastolic_bp"
+                                min="20"
+                                max="200"
+                                value="80"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cholesterol">
+                                <span class="field-icon">◉</span>Cholesterol (mg/dL)
+                            </label>
+                            <input
+                                class="form-control"
+                                type="number"
+                                id="cholesterol"
+                                name="cholesterol"
+                                min="50"
+                                max="700"
+                                value="200"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="glucose">
+                                <span class="field-icon">◉</span>Glucose Level (mg/dL)
+                            </label>
+                            <input
+                                class="form-control"
+                                type="number"
+                                id="glucose"
+                                name="glucose"
+                                min="20"
+                                max="800"
+                                value="100"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="smoking">
+                                <span class="field-icon">◇</span>Smoking
+                            </label>
+                            <select class="form-control" id="smoking" name="smoking" required>
+                                <option value="0" selected>No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="alcohol">
+                                <span class="field-icon">◇</span>Alcohol Intake
+                            </label>
+                            <select class="form-control" id="alcohol" name="alcohol" required>
+                                <option value="0" selected>No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="physical_activity">
+                                <span class="field-icon">↗</span>Physical Activity
+                            </label>
+                            <select
+                                class="form-control"
+                                id="physical_activity"
+                                name="physical_activity"
+                                required
+                            >
+                                <option value="1" selected>Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="family_history">
+                                <span class="field-icon">♧</span>Family History
+                            </label>
+                            <select
+                                class="form-control"
+                                id="family_history"
+                                name="family_history"
+                                required
+                            >
+                                <option value="0" selected>No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                            <span class="form-hint">History of relevant disease in the family</span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary submit-button" id="submit-button" type="submit">
+                        <span class="loading-spinner" aria-hidden="true"></span>
+                        <span id="button-label">✦ &nbsp; Get Prediction</span>
+                    </button>
+
+                    <p class="form-disclaimer">
+                        Submitting runs your inputs through the locally trained
+                        models. This form does not contact a healthcare provider.
+                    </p>
+                </form>
+            </section>
+
+            <aside class="form-sidebar">
+                <section class="tips-card animate-in animate-delay-2">
+                    <div class="tips-heading">
+                        <span aria-hidden="true">✧</span>
+                        <h3>Quick Tips</h3>
+                    </div>
+
+                    <ul class="tips-list">
+                        <li><span class="tip-check">✓</span><span>Enter age between 0 and 120 years.</span></li>
+                        <li><span class="tip-check">✓</span><span>Use the requested units for BMI, blood pressure, cholesterol, and glucose.</span></li>
+                        <li><span class="tip-check">✓</span><span>Select Yes or No for lifestyle and family-history fields.</span></li>
+                        <li><span class="tip-check">✓</span><span>Use accurate information when available; the sample values are for demonstration.</span></li>
+                    </ul>
+                </section>
+
+                <section class="tips-card animate-in animate-delay-3">
+                    <div class="tips-heading">
+                        <span aria-hidden="true">⌘</span>
+                        <h3>Models Used</h3>
+                    </div>
+
+                    <p class="muted" style="font-size:12px;line-height:1.8;">
+                        Each disease target is evaluated by four trained models.
+                    </p>
+
+                    <div class="model-pills">
+                        <span class="model-pill">Logistic Regression</span>
+                        <span class="model-pill">Decision Tree</span>
+                        <span class="model-pill">Random Forest</span>
+                        <span class="model-pill">Bayesian Network</span>
+                    </div>
+                </section>
+
+                <section class="alert alert-warning">
+                    <strong>Important</strong><br>
+                    This academic system is not clinically validated.
+                    Its predictions are experimental and must not be used
+                    for diagnosis or treatment decisions.
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <strong>HealthAI</strong> · Academic disease-risk prediction project
+    </footer>
+
+    <script>
+        const predictionForm = document.getElementById("prediction-form");
+        const submitButton = document.getElementById("submit-button");
+        const buttonLabel = document.getElementById("button-label");
+
+        predictionForm.addEventListener("submit", function () {
+            if (!predictionForm.checkValidity()) {
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.classList.add("is-loading");
+            buttonLabel.textContent = "Processing predictions...";
+        });
+    </script>
+</body>
+</html>

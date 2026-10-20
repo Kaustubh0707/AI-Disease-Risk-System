@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b2347">
+    <meta name="description" content="Explore experimental AI-based disease risk predictions and machine learning model comparisons.">
+    <title>HealthAI | AI Disease Risk Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(35px, 7vw, 76px);
+            border-radius: 24px;
+            background:
+                radial-gradient(circle at 85% 30%, rgba(66, 213, 245, .20), transparent 30%),
+                linear-gradient(125deg, #071a35, #103d70 72%, #126d9b);
+            color: white;
+            box-shadow: 0 20px 50px rgba(7, 26, 53, .20);
+        }
+        .hero::after {
+            position: absolute;
+            top: -100px;
+            right: -70px;
+            width: 340px;
+            height: 340px;
+            border: 1px solid rgba(66, 213, 245, .22);
+            border-radius: 50%;
+            box-shadow: 0 0 0 35px rgba(66, 213, 245, .04),
+                        0 0 0 75px rgba(66, 213, 245, .03);
+            content: "";
+            pointer-events: none;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+        }
+        .hero .eyebrow { color: #62e1fa; }
+        .hero h1 {
+            max-width: 650px;
+            margin: 0;
+            font-size: clamp(36px, 5.5vw, 60px);
+            line-height: 1.12;
+            letter-spacing: -2px;
+        }
+        .hero h1 span { color: #54d9f6; }
+        .hero-description {
+            max-width: 590px;
+            margin: 20px 0 27px;
+            color: #d7e8fa;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .hero .btn-secondary {
+            border-color: rgba(255,255,255,.35);
+            background: transparent;
+            color: white;
+        }
+        .hero .btn-secondary:hover {
+            background: rgba(255,255,255,.10);
+        }
+        .hero-note {
+            margin: 24px 0 0;
+            color: #bdd7ef;
+            font-size: 12px;
+        }
+        .section-block { margin-top: 38px; }
+        .section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .section-heading h2 {
+            margin: 0;
+            font-size: 25px;
+            letter-spacing: -.6px;
+        }
+        .section-heading p {
+            margin: 5px 0 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        .disease-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .disease-card::after {
+            position: absolute;
+            right: -25px;
+            bottom: -35px;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: var(--card-glow, #e5f8ff);
+            opacity: .55;
+            content: "";
+            transition: transform 250ms ease;
+        }
+        .disease-card:hover::after { transform: scale(1.4); }
+        .disease-card > * { position: relative; z-index: 1; }
+        .disease-card h3 { margin: 0 0 8px; font-size: 18px; }
+        .disease-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .disease-icon {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            background: var(--card-glow, #e5f8ff);
+            color: var(--card-color, #1675ed);
+            font-size: 24px;
+        }
+        .disease-link {
+            display: inline-flex;
+            margin-top: 18px;
+            color: var(--blue-600);
+            font-size: 13px;
+            font-weight: 750;
+        }
+        .algorithm-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .algorithm-item {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: white;
+        }
+        .algorithm-symbol {
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            margin-bottom: 12px;
+            border-radius: 11px;
+            background: #eaf4ff;
+            color: var(--blue-600);
+            font-weight: 800;
+        }
+        .algorithm-item strong {
+            display: block;
+            font-size: 13px;
+        }
+        .algorithm-item p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .workflow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .step-number {
+            display: grid;
+            flex: 0 0 38px;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: #e6f3ff;
+            color: var(--blue-600);
+            font-weight: 800;
+        }
+        .workflow-step h3 { margin: 0 0 5px; font-size: 15px; }
+        .workflow-step p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        .disclaimer-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-top: 30px;
+            border-color: #ffdfaa;
+            background: #fff8e9;
+        }
+        .disclaimer-icon { font-size: 22px; }
+        .disclaimer-card h3 { margin: 0 0 5px; font-size: 14px; color: #80531b; }
+        .disclaimer-card p { margin: 0; color: #80531b; font-size: 12px; line-height: 1.8; }
+        @media (max-width: 800px) {
+            .algorithm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .workflow { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 500px) {
+            .hero { padding: 30px 22px; }
+            .hero h1 { letter-spacing: -1px; }
+            .hero-actions .btn { width: 100%; }
+            .algorithm-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar" aria-label="Main navigation">
+            <a class="brand" href="/">
+                <span class="brand-mark" aria-hidden="true">✚</span>
+                <span>HealthAI</span>
+            </a>
+            <div class="nav-links">
+                <a class="nav-link active" href="/" aria-current="page">Home</a>
+                <a class="nav-link" href="/predict">Predict Risk</a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="hero animate-in">
+            <div class="hero-content">
+                <p class="eyebrow">Smarter Insights. Healthier Tomorrows.</p>
+                <h1>AI-Powered Disease <span>Risk Prediction</span></h1>
+                <p class="hero-description">
+                    Explore machine learning and Bayesian Network models
+                    using structured health data. Compare experimental
+                    predictions and understand how different algorithms perform.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="/predict">
+                        ✦ &nbsp; Try Prediction
+                    </a>
+                    <a class="btn btn-secondary" href="/dashboard">
+                        View Model Dashboard &nbsp; →
+                    </a>
+                </div>
+                <p class="hero-note">
+                    Academic project · Machine learning · Decision support
+                </p>
+            </div>
+        </section>
+
+        <section class="section-block" aria-labelledby="disease-heading">
+            <div class="section-heading">
+                <div>
+                    <h2 id="disease-heading">Explore Disease Categories</h2>
+                    <p>View experimental predictions for three disease targets.</p>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <article class="card card-hover disease-card animate-in"
+                         style="--card-glow:#ffedf0;--card-color:#e84d68;">
+                    <div class="disease-icon" aria-hidden="true">♡</div>
+                    <h3>Heart Disease</h3>
+                    <p>Explore predictions based on patient features and compare four AI algorithms.</p>
+                    <a class="disease-link" href="/predict">Explore predictions →</a>
+                </article>
+
+                <article class="card card-hover disease-card animate-in animate-delay-1"
+                         style="--card-glow:#e2f8ef;--card-color:#0b9b72;">
+                    <div class="disease-icon" aria-hidden="true">◉</div>
+                    <h3>Diabetes</h3>
+                    <p>Compare model outputs using features such as BMI and glucose level.</p>
+                    <a class="disease-link" href="/predict">Explore predictions →</a>
+                </article>
+
+                <article class="card card-hover disease-card animate-in animate-delay-2"
+                         style="--card-glow:#f1ebff;--card-color:#8254e8;">
+                    <div class="disease-icon" aria-hidden="true">⌘</div>
+                    <h3>Stroke</h3>
+                    <p>Examine model outputs using selected health and lifestyle features.</p>
+                    <a class="disease-link" href="/predict">Explore predictions →</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="section-block" aria-labelledby="algorithm-heading">
+            <div class="section-heading">
+                <div>
+                    <h2 id="algorithm-heading">AI Models Under the Hood</h2>
+                    <p>Four approaches, compared using the same project dataset.</p>
+                </div>
+                <a class="disease-link" href="/dashboard">View performance →</a>
+            </div>
+
+            <div class="algorithm-grid">
+                <article class="algorithm-item card-hover">
+                    <div class="algorithm-symbol">LR</div>
+                    <strong>Logistic Regression</strong>
+                    <p>Baseline classification model.</p>
+                </article>
+                <article class="algorithm-item card-hover">
+                    <div class="algorithm-symbol">DT</div>
+                    <strong>Decision Tree</strong>
+                    <p>Rule-based classification.</p>
+                </article>
+                <article class="algorithm-item card-hover">
+                    <div class="algorithm-symbol">RF</div>
+                    <strong>Random Forest</strong>
+                    <p>Ensemble of decision trees.</p>
+                </article>
+                <article class="algorithm-item card-hover">
+                    <div class="algorithm-symbol">BN</div>
+                    <strong>Bayesian Network</strong>
+                    <p>Probabilistic inference.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section-block" aria-labelledby="workflow-heading">
+            <div class="section-heading">
+                <div>
+                    <h2 id="workflow-heading">How It Works</h2>
+                    <p>A simple workflow from patient inputs to model comparison.</p>
+                </div>
+            </div>
+
+            <div class="card workflow">
+                <div class="workflow-step">
+                    <span class="step-number">01</span>
+                    <div>
+                        <h3>Enter Health Information</h3>
+                        <p>Provide the requested demographic, health, and lifestyle inputs.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">02</span>
+                    <div>
+                        <h3>Run AI Models</h3>
+                        <p>Compare outputs from the trained classifiers and Bayesian Networks.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <span class="step-number">03</span>
+                    <div>
+                        <h3>Explore the Results</h3>
+                        <p>Review predictions and model performance in the dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card disclaimer-card" aria-label="Important disclaimer">
+            <span class="disclaimer-icon" aria-hidden="true">ⓘ</span>
+            <div>
+                <h3>Important Health Disclaimer</h3>
+                <p>
+                    This is an academic project using an experimental dataset.
+                    Its predictions have not been clinically validated and are
+                    not medical diagnoses. Do not use these results to make
+                    real medical decisions.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <strong>HealthAI</strong> · AI-Based Disease Risk Prediction and Decision Support System
+        <br>
+        Academic demonstration only — not a medical diagnostic tool.
+    </footer>
+</body>
+</html>

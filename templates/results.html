@@ -1,0 +1,515 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b2347">
+    <title>Prediction Results | HealthAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .results-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            border-radius: 19px;
+            background: linear-gradient(120deg, #0b2347, #15558b);
+            color: white;
+        }
+
+        .results-hero h1 {
+            margin: 0;
+            font-size: clamp(27px, 4vw, 36px);
+            letter-spacing: -1px;
+        }
+
+        .results-hero p {
+            margin: 8px 0 0;
+            color: #d7e8fa;
+            font-size: 13px;
+        }
+
+        .success-mark {
+            display: grid;
+            flex: 0 0 54px;
+            place-items: center;
+            width: 54px;
+            height: 54px;
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 17px;
+            background: rgba(66,213,245,.15);
+            color: #67e1fa;
+            font-size: 27px;
+        }
+
+        .patient-card { margin-bottom: 28px; }
+
+        .patient-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .patient-heading .card-icon { margin: 0; }
+
+        .patient-heading h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .patient-heading p {
+            margin: 3px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .patient-item {
+            min-width: 0;
+            padding: 13px;
+            border: 1px solid #edf2f8;
+            border-radius: 11px;
+            background: #f8fbff;
+        }
+
+        .patient-item span {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .patient-item strong {
+            display: block;
+            margin-top: 5px;
+            overflow-wrap: anywhere;
+            font-size: 15px;
+        }
+
+        .results-section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 34px 0 20px;
+        }
+
+        .results-section-heading h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: -.5px;
+        }
+
+        .results-section-heading p {
+            margin: 5px 0 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .disease-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: start;
+            gap: 20px;
+        }
+
+        .disease-result {
+            --accent: #1675ed;
+            --tint: #eaf4ff;
+            min-width: 0;
+            overflow: hidden;
+            padding: 0;
+            border-top: 4px solid var(--accent);
+        }
+
+        .disease-result.heart {
+            --accent: #e84d68;
+            --tint: #fff0f3;
+        }
+
+        .disease-result.diabetes {
+            --accent: #0b9b72;
+            --tint: #e9faf3;
+        }
+
+        .disease-result.stroke {
+            --accent: #8254e8;
+            --tint: #f3edff;
+        }
+
+        .disease-result-header {
+            padding: 22px 20px 18px;
+            background: var(--tint);
+        }
+
+        .disease-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .disease-symbol {
+            display: grid;
+            flex: 0 0 45px;
+            place-items: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 14px;
+            background: white;
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .disease-title-row h3 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .disease-title-row p {
+            margin: 4px 0 0;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .model-list {
+            display: grid;
+            gap: 0;
+            padding: 4px 20px 18px;
+        }
+
+        .model-result {
+            padding: 17px 0;
+            border-bottom: 1px solid #edf2f8;
+        }
+
+        .model-result:last-child { border-bottom: none; }
+
+        .model-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .model-name {
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .prediction-badge {
+            flex-shrink: 0;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .prediction-badge.positive {
+            background: #ffedf0;
+            color: #c52c4c;
+        }
+
+        .prediction-badge.negative {
+            background: #e2f8ef;
+            color: #087b59;
+        }
+
+        .probability-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .probability-line strong {
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+
+        .disease-result .progress-fill {
+            background: linear-gradient(90deg, var(--accent), #71d8ef);
+        }
+
+        .result-footnote {
+            margin: 0;
+            padding: 0 20px 20px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .results-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 28px 0;
+        }
+
+        .disclaimer {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .disclaimer-symbol {
+            flex: 0 0 auto;
+            font-size: 22px;
+        }
+
+        .disclaimer h3 {
+            margin: 0 0 5px;
+            font-size: 14px;
+        }
+
+        .disclaimer p {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 1050px) {
+            .disease-grid { grid-template-columns: 1fr; }
+            .patient-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .model-list { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 22px; }
+        }
+
+        @media (max-width: 650px) {
+            .results-hero { align-items: flex-start; padding: 24px; }
+            .patient-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .model-list { grid-template-columns: 1fr; }
+            .results-section-heading { align-items: flex-start; flex-direction: column; }
+            .results-actions .btn { width: 100%; }
+        }
+
+        @media print {
+            .site-header,
+            .results-actions,
+            .site-footer { display: none; }
+
+            body { background: white; }
+            .page-container { width: 100%; margin: 0; }
+            .card { box-shadow: none; break-inside: avoid; }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <nav class="navbar" aria-label="Main navigation">
+            <a class="brand" href="/">
+                <span class="brand-mark" aria-hidden="true">✚</span>
+                <span>HealthAI</span>
+            </a>
+
+            <div class="nav-links">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link active" href="/predict" aria-current="page">Predict Risk</a>
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="results-hero animate-in">
+            <div>
+                <p class="eyebrow">Analysis Complete</p>
+                <h1>Your Prediction Results</h1>
+                <p>Review the outputs from the trained models for each disease target.</p>
+            </div>
+            <div class="success-mark" aria-hidden="true">✓</div>
+        </section>
+
+        <section class="card patient-card animate-in animate-delay-1">
+            <div class="patient-heading">
+                <div class="card-icon" aria-hidden="true">♙</div>
+                <div>
+                    <h2>Patient Information Summary</h2>
+                    <p>Input values used to generate these model outputs.</p>
+                </div>
+            </div>
+
+            <div class="patient-grid">
+                <div class="patient-item">
+                    <span>Age</span>
+                    <strong>{{ patient.get('Age', '—') }} years</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Gender</span>
+                    <strong>{{ patient.get('Gender', '—') }}</strong>
+                </div>
+                <div class="patient-item">
+                    <span>BMI</span>
+                    <strong>{{ patient.get('BMI', '—') }}</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Systolic BP</span>
+                    <strong>{{ patient.get('Blood_Pressure_Systolic', '—') }} mmHg</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Diastolic BP</span>
+                    <strong>{{ patient.get('Blood_Pressure_Diastolic', '—') }} mmHg</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Cholesterol</span>
+                    <strong>{{ patient.get('Cholesterol', '—') }} mg/dL</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Glucose</span>
+                    <strong>{{ patient.get('Glucose_Level', '—') }} mg/dL</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Smoking</span>
+                    <strong>{{ 'Yes' if patient.get('Smoking') == 1 else 'No' }}</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Alcohol Intake</span>
+                    <strong>{{ 'Yes' if patient.get('Alcohol_Intake') == 1 else 'No' }}</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Physical Activity</span>
+                    <strong>{{ 'Yes' if patient.get('Physical_Activity') == 1 else 'No' }}</strong>
+                </div>
+                <div class="patient-item">
+                    <span>Family History</span>
+                    <strong>{{ 'Yes' if patient.get('Family_History') == 1 else 'No' }}</strong>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="model-results-heading">
+            <div class="results-section-heading">
+                <div>
+                    <h2 id="model-results-heading">Disease Model Comparison</h2>
+                    <p>Each card displays the classification and positive-class probability from each model.</p>
+                </div>
+                <span class="badge badge-info">4 models per disease</span>
+            </div>
+
+            <div class="disease-grid">
+                {% for disease in results %}
+                    <article class="card disease-result animate-in
+                        {% if disease.name == 'Heart Disease' %}heart
+                        {% elif disease.name == 'Diabetes' %}diabetes
+                        {% else %}stroke{% endif %}">
+
+                        <div class="disease-result-header">
+                            <div class="disease-title-row">
+                                <div class="disease-symbol" aria-hidden="true">
+                                    {% if disease.name == 'Heart Disease' %}♡
+                                    {% elif disease.name == 'Diabetes' %}◉
+                                    {% else %}⌘{% endif %}
+                                </div>
+                                <div>
+                                    <h3>{{ disease.name }}</h3>
+                                    <p>Individual model outputs</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="model-list">
+                            {% for model in disease.models %}
+                                <div class="model-result">
+                                    <div class="model-top">
+                                        <span class="model-name">{{ model.name }}</span>
+                                        <span class="prediction-badge
+                                            {% if model.prediction == 1 %}positive
+                                            {% else %}negative{% endif %}">
+                                            {{ model.label }}
+                                        </span>
+                                    </div>
+
+                                    {% if model.percentage is not none %}
+                                        <div class="probability-line">
+                                            <span>Positive-class probability</span>
+                                            <strong>{{ "%.2f"|format(model.percentage) }}%</strong>
+                                        </div>
+                                        <div class="progress-track">
+                                            <div
+                                                class="progress-fill probability-bar"
+                                                data-percentage="{{ model.percentage }}"
+                                                role="progressbar"
+                                                aria-label="{{ model.name }} positive-class probability"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100"
+                                                aria-valuenow="{{ model.percentage }}">
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p class="muted" style="font-size:11px;margin:0;">
+                                            Probability is not available for this model.
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <p class="result-footnote">
+                            Probabilities reflect the model and dataset, not a clinically validated personal risk estimate.
+                        </p>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="results-actions">
+            <a class="btn btn-primary" href="/predict">↻ &nbsp; New Prediction</a>
+            <a class="btn btn-secondary" href="/dashboard">View Model Dashboard &nbsp; →</a>
+            <button class="btn btn-secondary" type="button" onclick="window.print()">
+                Print Results
+            </button>
+        </div>
+
+        <section class="card alert-warning disclaimer">
+            <span class="disclaimer-symbol" aria-hidden="true">ⓘ</span>
+            <div>
+                <h3>Important Disclaimer</h3>
+                <p>
+                    This is an academic decision-support demonstration using an experimental dataset.
+                    Predictions and probabilities are not clinically validated and must not be used
+                    for diagnosis, treatment, or other real medical decisions. Consult a qualified
+                    healthcare professional for medical concerns.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <strong>HealthAI</strong> · AI-Based Disease Risk Prediction and Decision Support System
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const bars = document.querySelectorAll(".probability-bar");
+
+            bars.forEach(function (bar, index) {
+                const rawValue = Number(bar.dataset.percentage);
+                const percentage = Number.isFinite(rawValue)
+                    ? Math.min(100, Math.max(0, rawValue))
+                    : 0;
+
+                bar.style.width = "0%";
+                bar.setAttribute("aria-valuenow", String(percentage));
+
+                window.setTimeout(function () {
+                    bar.style.width = percentage + "%";
+                }, 100 + index * 80);
+            });
+        });
+    </script>
+</body>
+</html>
