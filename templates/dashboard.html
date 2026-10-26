@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Dashboard | HealthAI</title>
+    <title>Model Analytics | HealthAI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         .dashboard-container {
-            width: min(1200px, 92%);
+            width: min(1240px, 92%);
             margin: 36px auto 60px;
         }
 
@@ -18,24 +17,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
             flex-wrap: wrap;
-            margin-bottom: 28px;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .dashboard-heading h1 {
-            margin-bottom: 8px;
+            margin: 0;
+            font-size: clamp(28px, 4vw, 40px);
+            letter-spacing: -1.2px;
+            line-height: 1.2;
         }
 
         .dashboard-subtitle {
-            color: var(--text-muted, #64748b);
-            margin: 0;
+            margin: 12px 0 0;
+            color: var(--text-secondary);
+            font-size: 15px;
         }
 
         .dashboard-actions {
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 10px;
         }
 
         .dashboard-actions a,
@@ -45,42 +48,50 @@
             justify-content: center;
             gap: 8px;
             padding: 11px 17px;
-            border-radius: 10px;
-            border: 1px solid #dbe4f0;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
+            border-radius: 11px;
+            border: 1px solid var(--border);
             background: white;
-            color: #16304f;
-            font-size: 14px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 220ms ease, box-shadow 220ms ease;
+        }
+
+        .dashboard-actions a:hover,
+        .dashboard-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
         }
 
         .dashboard-actions .primary-action {
-            background: #1769e0;
+            background: linear-gradient(135deg, var(--blue-600), var(--blue-500));
+            border-color: transparent;
             color: white;
-            border-color: #1769e0;
         }
 
         .dashboard-card {
-            background: white;
-            border: 1px solid #e5eaf2;
-            border-radius: 18px;
-            padding: 24px;
-            box-shadow: 0 8px 30px rgba(21, 48, 83, 0.045);
             min-width: 0;
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .dashboard-card h2 {
+            margin: 0 0 8px;
+            color: var(--text-primary);
             font-size: 18px;
-            margin: 0 0 7px;
-            color: #142b49;
+            letter-spacing: -0.3px;
         }
 
         .card-description {
-            color: #718096;
-            font-size: 13px;
             margin: 0 0 22px;
-            line-height: 1.6;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
         }
 
         .metric-grid {
@@ -90,34 +101,74 @@
             margin-bottom: 24px;
         }
 
-        .metric-label {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 12px;
+        .metric-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
+            min-height: 210px;
+            padding: 22px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            background: white;
+            box-shadow: var(--shadow-sm);
+            transition: transform 220ms ease, box-shadow 220ms ease;
         }
 
-        .metric-value {
-            font-size: clamp(23px, 3vw, 32px);
-            font-weight: 750;
-            color: #172f50;
-            letter-spacing: -1px;
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
         }
 
-        .metric-note {
-            margin-top: 9px;
-            font-size: 12px;
-            color: #7b8ba1;
+        .metric-card::after {
+            position: absolute;
+            right: -22px;
+            bottom: -30px;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: rgba(37, 137, 245, 0.055);
+            content: "";
         }
 
         .metric-icon {
-            width: 39px;
-            height: 39px;
-            border-radius: 12px;
             display: grid;
             place-items: center;
-            font-size: 19px;
-            margin-bottom: 18px;
-            background: #eaf3ff;
+            width: 42px;
+            height: 42px;
+            margin-bottom: 17px;
+            border-radius: 13px;
+            background: #eaf4ff;
+            font-size: 20px;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .metric-value {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            color: var(--navy-900);
+            font-size: clamp(27px, 2.5vw, 35px);
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: -0.7px;
+            white-space: nowrap;
+            overflow-wrap: normal;
+        }
+
+        .metric-note {
+            margin-top: 8px;
+            color: #8493a8;
+            font-size: 11px;
+            line-height: 1.5;
+            max-width: 100%;
         }
 
         .dashboard-grid {
@@ -130,118 +181,332 @@
         .chart-wrapper {
             position: relative;
             width: 100%;
-            height: 310px;
+            height: 320px;
         }
 
         .filter-row {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            justify-content: space-between;
             flex-wrap: wrap;
+            gap: 14px;
             margin-bottom: 20px;
         }
 
+        .filter-row label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
         .filter-control {
-            padding: 10px 13px;
-            min-width: 180px;
-            border: 1px solid #dce4ef;
+            width: 100%;
+            max-width: 250px;
+            min-width: 175px;
+            padding: 10px 12px;
+            border: 1px solid #dce7f4;
             border-radius: 10px;
+            outline: none;
             background: white;
-            color: #243b59;
-            font-size: 14px;
-        }
-
-        .table-scroll {
-            overflow-x: auto;
-            width: 100%;
-        }
-
-        .comparison-table {
-            border-collapse: collapse;
-            width: 100%;
-            min-width: 720px;
+            color: var(--text-primary);
             font-size: 13px;
         }
 
-        .comparison-table th {
-            background: #f4f7fb;
-            color: #53657e;
+        .filter-control:focus {
+            border-color: var(--blue-500);
+            box-shadow: 0 0 0 3px rgba(37, 137, 245, 0.12);
+        }
+
+        .search-control {
+            flex: 1;
+            width: 100%;
+            max-width: 280px;
+            min-width: 180px;
+            padding: 10px 13px;
+            border: 1px solid #dce7f4;
+            border-radius: 10px;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .search-control:focus {
+            border-color: var(--blue-500);
+            box-shadow: 0 0 0 3px rgba(37, 137, 245, 0.12);
+        }
+
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e7eef7;
+            border-radius: 12px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            min-width: 720px;
+            border-collapse: collapse;
             text-align: left;
-            font-weight: 650;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
             padding: 14px 15px;
+            border-bottom: 1px solid #edf2f8;
+            font-size: 12px;
             white-space: nowrap;
         }
 
-        .comparison-table td {
-            padding: 15px;
-            border-bottom: 1px solid #edf1f6;
-            color: #344861;
+        .comparison-table th {
+            background: #f4f8fe;
+            color: #526987;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
         }
 
-        .comparison-table tr:hover td {
-            background: #f9fbfe;
+        .comparison-table th[data-sort-key] {
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .comparison-table th[data-sort-key]:hover {
+            background: #e8f1fc;
+            color: var(--blue-600);
+        }
+
+        .comparison-table th[data-sort-key]::after {
+            content: " ↕";
+            color: #9aaac0;
+            font-size: 10px;
+        }
+
+        .comparison-table th[data-sort-direction="asc"]::after {
+            content: " ↑";
+            color: var(--blue-600);
+        }
+
+        .comparison-table th[data-sort-direction="desc"]::after {
+            content: " ↓";
+            color: var(--blue-600);
+        }
+
+        .comparison-table tbody tr {
+            transition: background 180ms ease;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: #f7fbff;
+        }
+
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .disease-badge {
             display: inline-block;
+            padding: 5px 9px;
             border-radius: 7px;
-            padding: 6px 9px;
-            background: #edf5ff;
+            background: #eaf4ff;
             color: #1759ae;
-            font-weight: 650;
-            white-space: nowrap;
+            font-weight: 700;
         }
 
         .score-cell {
-            font-weight: 700;
-            color: #183d69;
+            color: #087b59;
+            font-weight: 800;
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 29px;
+            min-height: 25px;
+            border-radius: 7px;
+            background: #f0ebff;
+            color: #7040d5;
+            font-size: 11px;
+            font-weight: 800;
         }
 
         .table-status {
-            padding: 15px;
-            background: #f7f9fc;
+            padding: 14px 16px;
             border-radius: 10px;
-            color: #5e6e83;
-            font-size: 13px;
-            line-height: 1.6;
+            background: #f4f8fe;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.7;
         }
 
         .dashboard-disclaimer {
             margin-top: 24px;
+            padding: 18px 20px;
             border: 1px solid #f0dfb3;
             border-radius: 13px;
             background: #fffaf0;
             color: #765719;
-            padding: 17px 19px;
-            font-size: 13px;
-            line-height: 1.7;
+            font-size: 12px;
+            line-height: 1.8;
         }
 
         .dashboard-disclaimer strong {
             display: block;
-            margin-bottom: 4px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 35px 15px;
-            color: #64748b;
-        }
-
-        .empty-state h3 {
-            color: #203957;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            font-size: 13px;
         }
 
         .dashboard-footer {
-            text-align: center;
             padding: 25px 10px 0;
             color: #8491a5;
-            font-size: 12px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        /* Best model insights */
+        .insights-section {
+            margin-bottom: 24px;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .insight-card {
+            min-width: 0;
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: linear-gradient(145deg, #ffffff, #f5faff);
+            box-shadow: var(--shadow-sm);
+            transition: transform 220ms ease, box-shadow 220ms ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .insight-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .insight-icon {
+            display: grid;
+            place-items: center;
+            width: 43px;
+            height: 43px;
+            flex-shrink: 0;
+            border-radius: 13px;
+            background: #e8f4ff;
+            font-size: 21px;
+        }
+
+        .insight-disease {
+            margin: 0;
+            color: var(--navy-900);
+            font-size: 15px;
+            font-weight: 750;
+        }
+
+        .insight-caption {
+            margin: 3px 0 0;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .insight-model {
+            margin: 0 0 8px;
+            color: var(--navy-900);
+            font-size: 19px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .insight-score {
+            color: var(--success);
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.7px;
+        }
+
+        .insight-score-label {
+            margin-top: 3px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .insight-empty {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
         }
 
         @media (max-width: 850px) {
+            .insights-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 560px) {
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-label {
+            margin-bottom: 7px;
+            color: var(--blue-600);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+        }
+
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .table-toolbar .filter-row {
+            margin: 0;
+        }
+
+        .table-count {
+            margin-top: 13px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .empty-state {
+            padding: 25px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 950px) {
             .metric-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -251,14 +516,24 @@
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 560px) {
             .dashboard-container {
-                width: 94%;
-                margin-top: 22px;
+                width: 93%;
+                margin-top: 24px;
             }
 
-            .dashboard-card {
+            .dashboard-card,
+            .metric-card {
                 padding: 18px;
+            }
+
+            .dashboard-actions {
+                width: 100%;
+            }
+
+            .dashboard-actions a,
+            .dashboard-actions button {
+                flex: 1;
             }
 
             .metric-grid {
@@ -270,13 +545,26 @@
             }
 
             .chart-wrapper {
-                height: 260px;
+                height: 270px;
+            }
+
+            .filter-control,
+            .search-control {
+                max-width: none;
+                width: 100%;
+            }
+
+            .table-toolbar,
+            .table-toolbar .filter-row {
+                width: 100%;
             }
         }
 
         @media print {
+            .site-header,
             .dashboard-actions,
-            .filter-row select,
+            .filter-row,
+            .search-control,
             .dashboard-footer {
                 display: none !important;
             }
@@ -285,539 +573,784 @@
                 background: white !important;
             }
 
-            .dashboard-card {
+            .dashboard-container {
+                width: 100%;
+                margin: 0;
+            }
+
+            .dashboard-card,
+            .metric-card {
                 box-shadow: none;
                 break-inside: avoid;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
     </style>
 </head>
 
 <body>
+<header class="site-header">
     <nav class="navbar">
-        <div class="container nav-container">
-            <a class="brand" href="{{ url_for('home') }}">
-                <span class="brand-icon">✚</span>
-                HealthAI
-            </a>
+        <a class="brand" href="{{ url_for('home') }}">
+            <span class="brand-mark">✚</span>
+            HealthAI
+        </a>
 
-            <div class="nav-links">
-                <a href="{{ url_for('home') }}">Home</a>
-                <a href="{{ url_for('predict') }}">Predict</a>
-                <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
-            </div>
+        <div class="nav-links">
+            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-link" href="{{ url_for('predict') }}">Predict</a>
+            <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
         </div>
     </nav>
+</header>
 
-    <main class="dashboard-container">
-        <section class="dashboard-heading">
-            <div>
-                <p class="eyebrow">MODEL ANALYTICS</p>
-                <h1>Performance Dashboard</h1>
-                <p class="dashboard-subtitle">
-                    Explore and compare the performance of disease prediction algorithms.
-                </p>
-            </div>
+<main class="dashboard-container">
+    <section class="dashboard-heading">
+        <div>
+            <p class="eyebrow">HEALTHAI INTELLIGENCE</p>
+            <h1>Model Analytics</h1>
+            <p class="dashboard-subtitle">
+                Explore model performance, compare evaluation metrics, and inspect validation results.
+            </p>
+        </div>
 
-            <div class="dashboard-actions">
-                <button type="button" onclick="window.print()">Print Report</button>
-                <a href="{{ url_for('predict') }}" class="primary-action">＋ New Prediction</a>
-            </div>
-        </section>
+        <div class="dashboard-actions">
+            <button type="button" onclick="window.print()">↗ Print Report</button>
+            <a href="{{ url_for('predict') }}" class="primary-action">＋ New Prediction</a>
+        </div>
+    </section>
 
-        <section class="metric-grid">
-            <article class="dashboard-card">
-                <div class="metric-icon">🧠</div>
-                <div class="metric-label">Models Evaluated</div>
-                <div class="metric-value" id="models-count">—</div>
-                <div class="metric-note">Across all disease targets</div>
+    <section class="metric-grid" aria-label="Dashboard summary">
+        <article class="metric-card">
+            <div class="metric-icon">🧠</div>
+            <div class="metric-label">Models Evaluated</div>
+            <strong class="metric-value" id="models-count">—</strong>
+            <div class="metric-note">Distinct algorithms in recorded results</div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-icon">🩺</div>
+            <div class="metric-label">Disease Targets</div>
+            <strong class="metric-value" id="disease-count">—</strong>
+            <div class="metric-note">Targets represented in model results</div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-icon">📊</div>
+            <div class="metric-label">Average Accuracy</div>
+            <strong class="metric-value" id="average-accuracy">—</strong>
+            <div class="metric-note">Mean of available recorded accuracies</div>
+        </article>
+
+        <article class="metric-card">
+            <div class="metric-icon">🏆</div>
+            <div class="metric-label">Top Accuracy</div>
+            <strong class="metric-value" id="best-accuracy">—</strong>
+            <div class="metric-note">Highest recorded accuracy, not a clinical guarantee</div>
+        </article>
+    </section>
+
+    <section class="insights-section">
+        <p class="section-label">SMART MODEL INSIGHTS</p>
+        <h2 style="margin: 0 0 8px; font-size: 21px;">Best Model by Disease</h2>
+        <p class="card-description">
+            The highest recorded accuracy for each disease target, calculated from the evaluation results.
+        </p>
+
+        <div class="insights-grid" id="best-model-insights">
+            <article class="insight-card">
+                <p class="insight-empty">Calculating model insights…</p>
             </article>
+        </div>
 
-            <article class="dashboard-card">
-                <div class="metric-icon">🩺</div>
-                <div class="metric-label">Disease Targets</div>
-                <div class="metric-value" id="disease-count">—</div>
-                <div class="metric-note">Heart disease, diabetes and stroke</div>
-            </article>
+        <p class="table-count">
+            Rankings reflect the recorded test results and do not establish clinical suitability.
+        </p>
+    </section>
 
-            <article class="dashboard-card">
-                <div class="metric-icon">📊</div>
-                <div class="metric-label">Average Accuracy</div>
-                <div class="metric-value" id="average-accuracy">—</div>
-                <div class="metric-note">Mean across available model results</div>
-            </article>
-
-            <article class="dashboard-card">
-                <div class="metric-icon">🏆</div>
-                <div class="metric-label">Top Model Result</div>
-                <div class="metric-value" id="best-accuracy">—</div>
-                <div class="metric-note">Highest recorded accuracy</div>
-            </article>
-        </section>
-
-        <section class="dashboard-grid">
-            <article class="dashboard-card">
-                <h2>Model Accuracy Comparison</h2>
-                <p class="card-description">
-                    Compare accuracy across the different disease prediction tasks.
-                </p>
-                <div class="chart-wrapper">
-                    <canvas id="accuracyChart" aria-label="Model accuracy comparison chart"></canvas>
-                </div>
-                <div id="accuracy-chart-message" class="table-status" hidden></div>
-            </article>
-
-            <article class="dashboard-card">
-                <h2>Evaluation Metrics</h2>
-                <p class="card-description">
-                    Compare precision, recall and F1-score for the selected disease.
-                </p>
-                <div class="filter-row">
-                    <label for="metric-disease">Disease target</label>
-                    <select id="metric-disease" class="filter-control">
-                        <option value="all">All disease targets</option>
-                    </select>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="metricsChart" aria-label="Precision recall and F1 score chart"></canvas>
-                </div>
-                <div id="metrics-chart-message" class="table-status" hidden></div>
-            </article>
-        </section>
-
-        <section class="dashboard-card">
-            <div class="filter-row">
-                <div>
-                    <h2>Detailed Model Comparison</h2>
-                    <p class="card-description" style="margin: 7px 0 0;">
-                        Filter results and inspect the recorded evaluation scores.
-                    </p>
-                </div>
-
-                <label>
-                    <span class="sr-only">Filter by disease</span>
-                    <select id="table-disease" class="filter-control">
-                        <option value="all">All diseases</option>
-                    </select>
-                </label>
-            </div>
-
-            <div class="table-scroll">
-                <table class="comparison-table">
-                    <thead>
-                        <tr>
-                            <th>Disease</th>
-                            <th>Model</th>
-                            <th>Accuracy</th>
-                            <th>Precision</th>
-                            <th>Recall</th>
-                            <th>F1-Score</th>
-                            <th>ROC-AUC</th>
-                        </tr>
-                    </thead>
-                    <tbody id="comparison-body">
-                        <tr>
-                            <td colspan="7">Loading model results…</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="table-message" class="table-status" style="margin-top: 16px;" hidden></div>
-        </section>
-
-        <section class="dashboard-card" style="margin-top: 24px;">
-            <h2>Cross-Validation Results</h2>
+    <section class="dashboard-grid">
+        <article class="dashboard-card">
+            <p class="section-label">PERFORMANCE OVERVIEW</p>
+            <h2>Model Accuracy Comparison</h2>
             <p class="card-description">
-                Five-fold cross-validation helps assess how consistently a model performs across different data splits.
+                Compare recorded accuracy for each algorithm across the available disease targets.
+                Hover over a bar for its exact value.
             </p>
 
-            <div class="table-scroll">
-                <table class="comparison-table">
-                    <thead id="cv-head"></thead>
-                    <tbody id="cv-body"></tbody>
-                </table>
+            <div class="chart-wrapper">
+                <canvas id="accuracyChart" aria-label="Model accuracy comparison chart"></canvas>
             </div>
-            <div id="cv-message" class="table-status" style="margin-top: 14px;" hidden></div>
-        </section>
+            <div id="accuracy-chart-message" class="table-status" hidden></div>
+        </article>
 
-        <section class="dashboard-disclaimer">
-            <strong>Important research limitation</strong>
-            These results are based on the dataset and experimental models used in this academic project.
-            High scores do not establish clinical accuracy. The dataset may contain simplified or synthetic
-            patterns. HealthAI is for educational demonstration only and must not be used for diagnosis,
-            treatment, or real-world medical decisions.
-        </section>
+        <article class="dashboard-card">
+            <p class="section-label">QUALITY METRICS</p>
+            <h2>Precision, Recall &amp; F1-Score</h2>
+            <p class="card-description">
+                Select a disease target to compare these three metrics between models.
+            </p>
 
-        <footer class="dashboard-footer">
-            HealthAI · AI-Based Disease Risk Prediction and Decision Support System
-        </footer>
-    </main>
+            <div class="filter-row">
+                <label for="metric-disease">Disease target</label>
+                <select id="metric-disease" class="filter-control">
+                    <option value="all">All disease targets</option>
+                </select>
+            </div>
 
-    <script type="application/json" id="results-data">{{ results | tojson }}</script>
-    <script type="application/json" id="cv-results-data">{{ cv_results | tojson }}</script>
+            <div class="chart-wrapper">
+                <canvas id="metricsChart" aria-label="Precision recall and F1-score chart"></canvas>
+            </div>
+            <div id="metrics-chart-message" class="table-status" hidden></div>
+        </article>
+    </section>
 
-    <script>
-        const modelResults = JSON.parse(
-            document.getElementById("results-data").textContent || "[]"
+    <section class="dashboard-card">
+        <p class="section-label">MODEL EXPLORER</p>
+        <h2>Detailed Model Comparison</h2>
+        <p class="card-description">
+            Filter by disease, search model names, and compare the recorded evaluation scores.
+            Click a column heading to change the sort order.
+        </p>
+
+        <div class="table-toolbar">
+            <div class="filter-row">
+                <label for="table-disease">Disease</label>
+                <select id="table-disease" class="filter-control">
+                    <option value="all">All diseases</option>
+                </select>
+            </div>
+
+            <label class="sr-only" for="model-search">Search model results</label>
+            <input id="model-search" class="search-control" type="search"
+                   placeholder="Search disease or model…">
+        </div>
+
+        <div class="table-scroll">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th data-sort-key="Disease" aria-sort="none">Disease</th>
+                        <th data-sort-key="Model" aria-sort="none">Model</th>
+                        <th data-sort-key="Accuracy" data-sort-direction="desc" aria-sort="descending">Accuracy</th>
+                        <th data-sort-key="Precision" aria-sort="none">Precision</th>
+                        <th data-sort-key="Recall" aria-sort="none">Recall</th>
+                        <th data-sort-key="F1_Score" aria-sort="none">F1-Score</th>
+                        <th data-sort-key="ROC_AUC" aria-sort="none">ROC-AUC</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-body">
+                    <tr><td colspan="8">Loading model results…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p class="table-count" id="table-count" aria-live="polite"></p>
+        <div id="table-message" class="table-status" style="margin-top: 15px;" hidden></div>
+    </section>
+
+    <section class="dashboard-card" style="margin-top: 24px;">
+        <p class="section-label">ROBUSTNESS CHECK</p>
+        <h2>Cross-Validation Results</h2>
+        <p class="card-description">
+            Cross-validation estimates how consistently a model performs across multiple data splits.
+            Results shown here are taken from the project's validation output.
+        </p>
+
+        <div class="table-scroll">
+            <table class="comparison-table">
+                <thead id="cv-head"></thead>
+                <tbody id="cv-body">
+                    <tr><td>Loading validation results…</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="cv-message" class="table-status" style="margin-top: 14px;" hidden></div>
+    </section>
+
+    <section class="dashboard-disclaimer">
+        <strong>⚠ Important research limitation</strong>
+        These results reflect the dataset and experimental models used in this academic project.
+        High evaluation scores do not establish clinical accuracy or safety. The dataset may contain
+        simplified or synthetic patterns. HealthAI is an educational demonstration and must not be
+        used for diagnosis, treatment, or real-world medical decisions.
+    </section>
+
+    <footer class="dashboard-footer">
+        HealthAI · AI-Based Disease Risk Prediction and Decision Support System
+    </footer>
+</main>
+
+<script type="application/json" id="results-data">{{ results | tojson }}</script>
+<script type="application/json" id="cv-results-data">{{ cv_results | tojson }}</script>
+
+<script>
+"use strict";
+
+const modelResults = JSON.parse(
+    document.getElementById("results-data").textContent || "[]"
+);
+
+const cvResults = JSON.parse(
+    document.getElementById("cv-results-data").textContent || "[]"
+);
+
+const metricKeys = ["Accuracy", "Precision", "Recall", "F1_Score", "ROC_AUC"];
+
+function normalizeDisease(value) {
+    return String(value ?? "").replaceAll("_", " ");
+}
+
+function normalizeModel(value) {
+    return String(value ?? "").replaceAll("_", " ");
+}
+
+function getNumber(value) {
+    if (value === null || value === undefined || value === "") return null;
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+}
+
+function metricFraction(value) {
+    const number = getNumber(value);
+    if (number === null) return null;
+    return number > 1 ? number / 100 : number;
+}
+
+function percent(value) {
+    const number = metricFraction(value);
+    return number === null ? "—" : (number * 100).toFixed(1) + "%";
+}
+
+function uniqueValues(rows, key) {
+    return [...new Set(
+        rows.map(row => row[key]).filter(
+            value => value !== null &&
+                     value !== undefined &&
+                     String(value).trim() !== ""
+        )
+    )];
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+function showMessage(elementId, message) {
+    const element = document.getElementById(elementId);
+    element.textContent = message;
+    element.hidden = false;
+}
+
+function hideMessage(elementId) {
+    document.getElementById(elementId).hidden = true;
+}
+
+function populateSelect(selectId, values, allLabel) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = "";
+
+    const allOption = document.createElement("option");
+    allOption.value = "all";
+    allOption.textContent = allLabel;
+    select.appendChild(allOption);
+
+    values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = normalizeDisease(value);
+        select.appendChild(option);
+    });
+}
+
+function animateNumber(element, finalValue, suffix = "") {
+    const target = document.getElementById(element);
+    target.textContent = finalValue + suffix;
+}
+
+function updateSummary() {
+    const models = new Set(modelResults.map(row => row.Model).filter(Boolean));
+    const diseases = new Set(modelResults.map(row => row.Disease).filter(Boolean));
+
+    const accuracies = modelResults
+        .map(row => metricFraction(row.Accuracy))
+        .filter(value => value !== null);
+
+    animateNumber("models-count", models.size);
+    animateNumber("disease-count", diseases.size);
+
+    if (accuracies.length) {
+        const average = accuracies.reduce((sum, value) => sum + value, 0)
+            / accuracies.length;
+
+        animateNumber("average-accuracy", (average * 100).toFixed(1), "%");
+        animateNumber("best-accuracy", (Math.max(...accuracies) * 100).toFixed(1), "%");
+    } else {
+        animateNumber("average-accuracy", "—");
+        animateNumber("best-accuracy", "—");
+    }
+}
+
+function renderBestModelInsights() {
+    const container = document.getElementById("best-model-insights");
+    container.innerHTML = "";
+
+    const diseases = uniqueValues(modelResults, "Disease");
+
+    if (!diseases.length) {
+        container.innerHTML =
+            '<article class="insight-card"><p class="insight-empty">No model results are available.</p></article>';
+        return;
+    }
+
+    const icons = ["❤️", "🩸", "🧠"];
+
+    diseases.forEach((disease, index) => {
+        const diseaseRows = modelResults
+            .filter(row => String(row.Disease) === String(disease))
+            .filter(row => metricFraction(row.Accuracy) !== null)
+            .sort((a, b) =>
+                metricFraction(b.Accuracy) - metricFraction(a.Accuracy)
+            );
+
+        const card = document.createElement("article");
+        card.className = "insight-card";
+
+        if (!diseaseRows.length) {
+            card.innerHTML = `
+                <div class="insight-top">
+                    <div class="insight-icon">${icons[index % icons.length]}</div>
+                    <div>
+                        <h3 class="insight-disease">${escapeHtml(normalizeDisease(disease))}</h3>
+                        <p class="insight-caption">Model performance</p>
+                    </div>
+                </div>
+                <p class="insight-empty">No accuracy score is available for this target.</p>
+            `;
+        } else {
+            const best = diseaseRows[0];
+
+            card.innerHTML = `
+                <div class="insight-top">
+                    <div class="insight-icon">${icons[index % icons.length]}</div>
+                    <div>
+                        <h3 class="insight-disease">${escapeHtml(normalizeDisease(disease))}</h3>
+                        <p class="insight-caption">Highest recorded accuracy</p>
+                    </div>
+                </div>
+                <p class="insight-model">${escapeHtml(normalizeModel(best.Model))}</p>
+                <div class="insight-score">${percent(best.Accuracy)}</div>
+                <p class="insight-score-label">
+                    ${diseaseRows.length} model result${diseaseRows.length === 1 ? "" : "s"} compared
+                </p>
+            `;
+        }
+
+        container.appendChild(card);
+    });
+}
+
+/* Interactive sorting for the detailed model comparison table. */
+let sortKey = "Accuracy";
+let sortDirection = "desc";
+
+function getSortValue(row, key) {
+    if (["Accuracy", "Precision", "Recall", "F1_Score", "ROC_AUC"].includes(key)) {
+        return metricFraction(row[key]);
+    }
+
+    if (key === "Disease") {
+        return normalizeDisease(row.Disease).toLowerCase();
+    }
+
+    if (key === "Model") {
+        return normalizeModel(row.Model).toLowerCase();
+    }
+
+    return row[key];
+}
+
+function getFilteredRows() {
+    const disease = document.getElementById("table-disease").value;
+    const query = document.getElementById("model-search").value.trim().toLowerCase();
+
+    return modelResults.filter(row => {
+        const matchesDisease =
+            disease === "all" || String(row.Disease) === disease;
+
+        const searchable = [
+            normalizeDisease(row.Disease),
+            normalizeModel(row.Model)
+        ].join(" ").toLowerCase();
+
+        return matchesDisease && searchable.includes(query);
+    }).sort((a, b) => {
+        const valueA = getSortValue(a, sortKey);
+        const valueB = getSortValue(b, sortKey);
+        let comparison = 0;
+
+        if (valueA === null || valueA === undefined || valueA === "") {
+            comparison =
+                valueB === null || valueB === undefined || valueB === "" ? 0 : 1;
+        } else if (valueB === null || valueB === undefined || valueB === "") {
+            comparison = -1;
+        } else if (typeof valueA === "number" && typeof valueB === "number") {
+            comparison = valueA - valueB;
+        } else {
+            comparison = String(valueA).localeCompare(String(valueB));
+        }
+
+        return sortDirection === "asc" ? comparison : -comparison;
+    });
+}
+
+function updateSortHeaders() {
+    document.querySelectorAll(".comparison-table th[data-sort-key]").forEach(header => {
+        const isActive = header.dataset.sortKey === sortKey;
+
+        if (isActive) {
+            header.dataset.sortDirection = sortDirection;
+        } else {
+            header.removeAttribute("data-sort-direction");
+        }
+
+        header.setAttribute(
+            "aria-sort",
+            isActive
+                ? (sortDirection === "asc" ? "ascending" : "descending")
+                : "none"
         );
+    });
+}
 
-        const cvResults = JSON.parse(
-            document.getElementById("cv-results-data").textContent || "[]"
+function handleSortClick(event) {
+    const selectedKey = event.currentTarget.dataset.sortKey;
+
+    if (sortKey === selectedKey) {
+        sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+        sortKey = selectedKey;
+        sortDirection = ["Disease", "Model"].includes(sortKey) ? "asc" : "desc";
+    }
+
+    updateSortHeaders();
+    renderTable();
+}
+
+function renderTable() {
+    const body = document.getElementById("comparison-body");
+    const rows = getFilteredRows();
+    body.innerHTML = "";
+
+    if (!rows.length) {
+        body.innerHTML =
+            '<tr><td colspan="8" class="empty-state">No matching model results. Try another search or filter.</td></tr>';
+
+        document.getElementById("table-count").textContent = "0 results";
+        return;
+    }
+
+    rows.forEach((row, index) => {
+        const tr = document.createElement("tr");
+
+        const values = [
+            `<span class="rank-badge">${index + 1}</span>`,
+            `<span class="disease-badge">${escapeHtml(normalizeDisease(row.Disease))}</span>`,
+            escapeHtml(normalizeModel(row.Model)),
+            `<span class="score-cell">${percent(row.Accuracy)}</span>`,
+            percent(row.Precision),
+            percent(row.Recall),
+            percent(row.F1_Score),
+            percent(row.ROC_AUC)
+        ];
+
+        values.forEach((value, cellIndex) => {
+            const td = document.createElement("td");
+            td.innerHTML = [0, 1, 3].includes(cellIndex) ? value : escapeHtml(value);
+            tr.appendChild(td);
+        });
+
+        body.appendChild(tr);
+    });
+
+    document.getElementById("table-count").textContent =
+        `Showing ${rows.length} of ${modelResults.length} recorded results, sorted by ${sortKey.replaceAll("_", "-")} (${sortDirection === "asc" ? "ascending" : "descending"}).`;
+}
+
+let accuracyChart = null;
+let metricsChart = null;
+
+const chartColors = [
+    { background: "rgba(22, 117, 237, 0.78)", border: "#1675ed" },
+    { background: "rgba(66, 190, 220, 0.78)", border: "#22b8d5" },
+    { background: "rgba(11, 155, 114, 0.78)", border: "#0b9b72" },
+    { background: "rgba(130, 84, 232, 0.78)", border: "#8254e8" }
+];
+
+function renderAccuracyChart() {
+    if (typeof Chart === "undefined") {
+        showMessage(
+            "accuracy-chart-message",
+            "Chart.js could not load. Connect to the internet to view charts; the comparison table is still available."
         );
+        return;
+    }
 
-        const metricKeys = ["Accuracy", "Precision", "Recall", "F1_Score", "ROC_AUC"];
-        const displayMetric = {
-            Accuracy: "Accuracy",
-            Precision: "Precision",
-            Recall: "Recall",
-            F1_Score: "F1-Score",
-            ROC_AUC: "ROC-AUC"
-        };
+    const diseases = uniqueValues(modelResults, "Disease");
+    const models = uniqueValues(modelResults, "Model");
 
-        function normalizeDisease(value) {
-            return String(value ?? "").replaceAll("_", " ");
+    if (!diseases.length || !models.length) {
+        showMessage(
+            "accuracy-chart-message",
+            "No model comparison data was found. Check all_models_comparison.csv."
+        );
+        return;
+    }
+
+    hideMessage("accuracy-chart-message");
+
+    const datasets = models.map((model, index) => ({
+        label: normalizeModel(model),
+        data: diseases.map(disease => {
+            const row = modelResults.find(item =>
+                item.Model === model && item.Disease === disease
+            );
+
+            const value = row ? metricFraction(row.Accuracy) : null;
+            return value === null ? null : value * 100;
+        }),
+        backgroundColor: chartColors[index % chartColors.length].background,
+        borderColor: chartColors[index % chartColors.length].border,
+        borderWidth: 1,
+        borderRadius: 6,
+        maxBarThickness: 42
+    }));
+
+    if (accuracyChart) accuracyChart.destroy();
+
+    accuracyChart = new Chart(document.getElementById("accuracyChart"), {
+        type: "bar",
+        data: {
+            labels: diseases.map(normalizeDisease),
+            datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: { usePointStyle: true, padding: 16 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context =>
+                            `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { callback: value => value + "%" },
+                    grid: { color: "#edf2f8" }
+                },
+                x: { grid: { display: false } }
+            }
         }
+    });
+}
 
-        function normalizeModel(value) {
-            return String(value ?? "").replaceAll("_", " ");
-        }
+function renderMetricsChart() {
+    if (typeof Chart === "undefined") {
+        showMessage(
+            "metrics-chart-message",
+            "Chart.js could not load. Connect to the internet to view charts."
+        );
+        return;
+    }
 
-        function getNumber(value) {
-            if (value === null || value === undefined || value === "") return null;
-            const number = Number(value);
-            if (!Number.isFinite(number)) return null;
-            return number;
-        }
+    const selectedDisease = document.getElementById("metric-disease").value;
+    const rows = selectedDisease === "all"
+        ? modelResults
+        : modelResults.filter(row => String(row.Disease) === selectedDisease);
 
-        function percent(value) {
-            const number = getNumber(value);
-            if (number === null) return "—";
-            return (number <= 1 ? number * 100 : number).toFixed(1) + "%";
-        }
+    if (!rows.length) {
+        showMessage("metrics-chart-message", "No metrics are available for this selection.");
+        if (metricsChart) metricsChart.destroy();
+        return;
+    }
 
-        function metricFraction(value) {
-            const number = getNumber(value);
-            if (number === null) return null;
-            return number > 1 ? number / 100 : number;
-        }
+    hideMessage("metrics-chart-message");
 
-        function uniqueValues(rows, key) {
-            return [...new Set(rows.map(row => row[key]).filter(value =>
-                value !== null && value !== undefined && String(value).trim() !== ""
-            ))];
-        }
+    const models = uniqueValues(rows, "Model");
 
-        function populateSelect(selectId, values, allLabel) {
-            const select = document.getElementById(selectId);
-            select.innerHTML = "";
+    const datasets = models.map((model, index) => {
+        const modelRows = rows.filter(row => row.Model === model);
 
-            const allOption = document.createElement("option");
-            allOption.value = "all";
-            allOption.textContent = allLabel;
-            select.appendChild(allOption);
-
-            values.forEach(value => {
-                const option = document.createElement("option");
-                option.value = value;
-                option.textContent = normalizeDisease(value);
-                select.appendChild(option);
-            });
-        }
-
-        function showMessage(elementId, message) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.hidden = false;
-        }
-
-        function updateSummary() {
-            const models = new Set(modelResults.map(row => row.Model).filter(Boolean));
-            const diseases = new Set(modelResults.map(row => row.Disease).filter(Boolean));
-            const accuracies = modelResults
-                .map(row => getNumber(row.Accuracy))
+        const averages = ["Precision", "Recall", "F1_Score"].map(key => {
+            const values = modelRows
+                .map(row => metricFraction(row[key]))
                 .filter(value => value !== null);
 
-            document.getElementById("models-count").textContent = models.size || "0";
-            document.getElementById("disease-count").textContent = diseases.size || "0";
+            return values.length
+                ? values.reduce((sum, value) => sum + value, 0) / values.length * 100
+                : null;
+        });
 
-            if (accuracies.length) {
-                const normalized = accuracies.map(value => value > 1 ? value / 100 : value);
-                const average = normalized.reduce((sum, value) => sum + value, 0) / normalized.length;
-                document.getElementById("average-accuracy").textContent =
-                    (average * 100).toFixed(1) + "%";
-                document.getElementById("best-accuracy").textContent =
-                    (Math.max(...normalized) * 100).toFixed(1) + "%";
+        return {
+            label: normalizeModel(model),
+            data: averages,
+            backgroundColor: chartColors[index % chartColors.length].background,
+            borderColor: chartColors[index % chartColors.length].border,
+            borderWidth: 1,
+            borderRadius: 5,
+            maxBarThickness: 42
+        };
+    });
+
+    if (metricsChart) metricsChart.destroy();
+
+    metricsChart = new Chart(document.getElementById("metricsChart"), {
+        type: "bar",
+        data: {
+            labels: ["Precision", "Recall", "F1-Score"],
+            datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: { usePointStyle: true, padding: 14 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => {
+                            const value = context.parsed.y;
+                            return `${context.dataset.label}: ${
+                                value === null ? "N/A" : value.toFixed(1) + "%"
+                            }`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { callback: value => value + "%" },
+                    grid: { color: "#edf2f8" }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderCrossValidation() {
+    const head = document.getElementById("cv-head");
+    const body = document.getElementById("cv-body");
+
+    head.innerHTML = "";
+    body.innerHTML = "";
+
+    if (!cvResults.length) {
+        showMessage(
+            "cv-message",
+            "Cross-validation results were not found. Check the project's validation output."
+        );
+
+        body.innerHTML = '<tr><td colspan="8">No validation data available.</td></tr>';
+        return;
+    }
+
+    hideMessage("cv-message");
+
+    const columns = Object.keys(cvResults[0]);
+    const headerRow = document.createElement("tr");
+
+    columns.forEach(column => {
+        const th = document.createElement("th");
+        th.textContent = column.replaceAll("_", " ");
+        headerRow.appendChild(th);
+    });
+
+    head.appendChild(headerRow);
+
+    cvResults.forEach(row => {
+        const tr = document.createElement("tr");
+
+        columns.forEach(column => {
+            const td = document.createElement("td");
+            const value = row[column];
+            const normalizedColumn = column.toLowerCase();
+
+            if (
+                typeof value === "number" &&
+                ["accuracy", "precision", "recall", "f1", "auc"].some(
+                    key => normalizedColumn.includes(key)
+                )
+            ) {
+                td.textContent = percent(value);
             } else {
-                document.getElementById("average-accuracy").textContent = "—";
-                document.getElementById("best-accuracy").textContent = "—";
-            }
-        }
-
-        function filteredRows() {
-            const disease = document.getElementById("table-disease").value;
-            return disease === "all"
-                ? modelResults
-                : modelResults.filter(row => String(row.Disease) === disease);
-        }
-
-        function renderTable() {
-            const body = document.getElementById("comparison-body");
-            const rows = filteredRows();
-            body.innerHTML = "";
-
-            if (!rows.length) {
-                body.innerHTML = '<tr><td colspan="7">No model results are available for this selection.</td></tr>';
-                return;
+                td.textContent =
+                    value === null || value === undefined ? "—" : String(value);
             }
 
-            rows.forEach(row => {
-                const tr = document.createElement("tr");
-                const values = [
-                    `<span class="disease-badge">${escapeHtml(normalizeDisease(row.Disease))}</span>`,
-                    escapeHtml(normalizeModel(row.Model)),
-                    `<span class="score-cell">${percent(row.Accuracy)}</span>`,
-                    percent(row.Precision),
-                    percent(row.Recall),
-                    percent(row.F1_Score),
-                    percent(row.ROC_AUC)
-                ];
+            tr.appendChild(td);
+        });
 
-                values.forEach((value, index) => {
-                    const td = document.createElement("td");
-                    td.innerHTML = index === 0 || index === 2 ? value : escapeHtml(value);
-                    tr.appendChild(td);
-                });
+        body.appendChild(tr);
+    });
+}
 
-                body.appendChild(tr);
-            });
-        }
+function initializeDashboard() {
+    if (!Array.isArray(modelResults) || !modelResults.length) {
+        showMessage(
+            "table-message",
+            "No model results are available. Check that all_models_comparison.csv exists and is loaded by Flask."
+        );
+    } else {
+        hideMessage("table-message");
+    }
 
-        function escapeHtml(value) {
-            return String(value ?? "").replace(/[&<>"']/g, char => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#39;"
-            })[char]);
-        }
+    const diseases = uniqueValues(modelResults, "Disease");
 
-        let accuracyChart = null;
-        let metricsChart = null;
+    populateSelect("table-disease", diseases, "All diseases");
+    populateSelect("metric-disease", diseases, "All disease targets");
 
-        function renderAccuracyChart() {
-            const canvas = document.getElementById("accuracyChart");
-            if (typeof Chart === "undefined") {
-                showMessage("accuracy-chart-message", "Charts need an internet connection to load Chart.js. The comparison table remains available.");
-                return;
-            }
+    updateSummary();
+    renderBestModelInsights();
+    renderTable();
+    renderAccuracyChart();
+    renderMetricsChart();
+    renderCrossValidation();
 
-            const diseases = uniqueValues(modelResults, "Disease");
-            const models = uniqueValues(modelResults, "Model");
+    document.getElementById("table-disease").addEventListener("change", renderTable);
+    document.getElementById("model-search").addEventListener("input", renderTable);
+    document.getElementById("metric-disease").addEventListener("change", renderMetricsChart);
 
-            if (!diseases.length || !models.length) {
-                showMessage("accuracy-chart-message", "No model comparison data was found. Check all_models_comparison.csv.");
-                return;
-            }
+    document.querySelectorAll(".comparison-table th[data-sort-key]").forEach(header => {
+        header.addEventListener("click", handleSortClick);
+    });
 
-            const colors = [
-                { background: "rgba(37, 99, 235, 0.78)", border: "#2563eb" },
-                { background: "rgba(6, 182, 212, 0.78)", border: "#06b6d4" },
-                { background: "rgba(16, 185, 129, 0.78)", border: "#10b981" },
-                { background: "rgba(139, 92, 246, 0.78)", border: "#8b5cf6" }
-            ];
+    updateSortHeaders();
+}
 
-            const datasets = models.map((model, index) => ({
-                label: normalizeModel(model),
-                data: diseases.map(disease => {
-                    const row = modelResults.find(item =>
-                        item.Model === model && item.Disease === disease
-                    );
-                    const value = row ? metricFraction(row.Accuracy) : null;
-                    return value === null ? null : value * 100;
-                }),
-                backgroundColor: colors[index % colors.length].background,
-                borderColor: colors[index % colors.length].border,
-                borderWidth: 1,
-                borderRadius: 6
-            }));
-
-            if (accuracyChart) accuracyChart.destroy();
-
-            accuracyChart = new Chart(canvas, {
-                type: "bar",
-                data: {
-                    labels: diseases.map(normalizeDisease),
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: "index", intersect: false },
-                    plugins: {
-                        legend: { position: "bottom", labels: { usePointStyle: true, padding: 16 } },
-                        tooltip: {
-                            callbacks: {
-                                label: context => `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: { callback: value => value + "%" },
-                            grid: { color: "#edf1f6" }
-                        },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        function renderMetricsChart() {
-            const canvas = document.getElementById("metricsChart");
-            if (typeof Chart === "undefined") {
-                showMessage("metrics-chart-message", "Charts need an internet connection to load Chart.js. Review the comparison table below.");
-                return;
-            }
-
-            const selectedDisease = document.getElementById("metric-disease").value;
-            const rows = selectedDisease === "all"
-                ? modelResults
-                : modelResults.filter(row => String(row.Disease) === selectedDisease);
-
-            if (!rows.length) {
-                showMessage("metrics-chart-message", "No metrics are available for this selection.");
-                if (metricsChart) metricsChart.destroy();
-                return;
-            }
-
-            const models = uniqueValues(rows, "Model");
-            const colors = [
-                { background: "rgba(37, 99, 235, 0.75)", border: "#2563eb" },
-                { background: "rgba(6, 182, 212, 0.75)", border: "#06b6d4" },
-                { background: "rgba(16, 185, 129, 0.75)", border: "#10b981" },
-                { background: "rgba(139, 92, 246, 0.75)", border: "#8b5cf6" }
-            ];
-
-            const datasets = models.map((model, index) => {
-                const modelRows = rows.filter(row => row.Model === model);
-                const averages = metricKeys.slice(1, 4).map(key => {
-                    const vals = modelRows.map(row => metricFraction(row[key]))
-                        .filter(value => value !== null);
-                    return vals.length
-                        ? vals.reduce((sum, value) => sum + value, 0) / vals.length * 100
-                        : null;
-                });
-
-                return {
-                    label: normalizeModel(model),
-                    data: averages,
-                    backgroundColor: colors[index % colors.length].background,
-                    borderColor: colors[index % colors.length].border,
-                    borderWidth: 1,
-                    borderRadius: 5
-                };
-            });
-
-            if (metricsChart) metricsChart.destroy();
-
-            metricsChart = new Chart(canvas, {
-                type: "bar",
-                data: {
-                    labels: ["Precision", "Recall", "F1-Score"],
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: "bottom", labels: { usePointStyle: true, padding: 14 } },
-                        tooltip: {
-                            callbacks: {
-                                label: context => `${context.dataset.label}: ${context.parsed.y === null ? "N/A" : context.parsed.y.toFixed(1) + "%"}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: { callback: value => value + "%" },
-                            grid: { color: "#edf1f6" }
-                        },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        function renderCrossValidation() {
-            const head = document.getElementById("cv-head");
-            const body = document.getElementById("cv-body");
-            head.innerHTML = "";
-            body.innerHTML = "";
-
-            if (!cvResults.length) {
-                showMessage("cv-message", "Cross-validation data was not found. Run 04_validate_models.py to generate it.");
-                return;
-            }
-
-            const columns = Object.keys(cvResults[0]);
-            const headerRow = document.createElement("tr");
-
-            columns.forEach(column => {
-                const th = document.createElement("th");
-                th.textContent = column.replaceAll("_", " ");
-                headerRow.appendChild(th);
-            });
-            head.appendChild(headerRow);
-
-            cvResults.forEach(row => {
-                const tr = document.createElement("tr");
-                columns.forEach(column => {
-                    const td = document.createElement("td");
-                    const value = row[column];
-                    const normalizedColumn = column.toLowerCase();
-
-                    if (typeof value === "number" &&
-                        (normalizedColumn.includes("accuracy") ||
-                         normalizedColumn.includes("precision") ||
-                         normalizedColumn.includes("recall") ||
-                         normalizedColumn.includes("f1") ||
-                         normalizedColumn.includes("auc"))) {
-                        td.textContent = percent(value);
-                    } else {
-                        td.textContent = value === null || value === undefined ? "—" : String(value);
-                    }
-                    tr.appendChild(td);
-                });
-                body.appendChild(tr);
-            });
-        }
-
-        function initializeDashboard() {
-            if (!modelResults.length) {
-                showMessage("table-message", "No model results are available. Make sure all_models_comparison.csv exists in the project root.");
-            }
-
-            const diseases = uniqueValues(modelResults, "Disease");
-            populateSelect("table-disease", diseases, "All diseases");
-            populateSelect("metric-disease", diseases, "All disease targets");
-
-            updateSummary();
-            renderTable();
-            renderAccuracyChart();
-            renderMetricsChart();
-            renderCrossValidation();
-
-            document.getElementById("table-disease").addEventListener("change", renderTable);
-            document.getElementById("metric-disease").addEventListener("change", renderMetricsChart);
-        }
-
-        initializeDashboard();
-    </script>
+initializeDashboard();
+</script>
 </body>
 </html>
